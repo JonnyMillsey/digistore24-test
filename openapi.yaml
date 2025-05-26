@@ -1,3 +1,6 @@
+# --- Generated a strongly typed typescript file for use in Angular typescript project
+# --- Below, we are missing some helpful schema object models
+# --- Consider a model for message and also an enum for status if required - example for status enum: 'sent', 'draft', 'pending', 'failed' (see bottom of file for reference)
 openapi: 3.0.0
 info:
   title: Messages API
@@ -8,6 +11,7 @@ paths:
       summary: Get Messages
       description: Retrieves a list of messages.
       responses:
+        # consider adding explicit error responses like '400' or '500' to handle API failure cases
         '200':
           description: Successful response
           content:
@@ -17,16 +21,21 @@ paths:
                 properties:
                   messages:
                     type: "array"
+                    # consider marking 'messages' property as 'required'.
+                    # It should be required in the response schema to allow strict type safety in consuming clients.
                     items:
+                    # if you decide to use the suggested object model for message, use the reference here - $ref: '#/components/schemas/Message'
                       type: "object"
                       properties:
                         text:
                           type: "string"
+                          # consider marking 'text' as required.
                         status:
                           type: "string"
+                          # consider marking 'status' as required.
                           enum:
-                            - "sent"
-              example:
+                            - "sent" # consider adding more properties to the enum here: 'sent', 'draft', 'pending', 'failed'
+              example: # this should be under the content -> application/json -> schema
                 messages:
                   - text: "Hello, World!"
                     status: "sent"
@@ -35,16 +44,38 @@ paths:
                   - text: "Thanks, I'm fine. How about you?"
                     status: "sent"
   /messages/send:
-    get:
+  # this shouldn't be a GET, it should be a POST / PUT method
+    get: 
       summary: Send a Message
+      # missing description here
+      # GET requests should not include requestBody
       requestBody:
+      # 'requestBody' is currently optional — this allows sending no data at all.
+      # I suggest making 'requestBody' required to enforce proper API usage.
         content:
           application/json:
             schema:
               type: "object"
+              # 'text' is also optional here. Clients could send `{}` or nothing.
+              # This field should be marked as 'required' to allow type-safe request generation.
               properties:
                 text:
                   type: "string"
       responses:
+        # no error responses, possible suggestions '400' '500'
         '204':
           description: Successfully sent
+
+# *Ref - Consider this object model for message
+# components:
+  # schemas:
+    # Message:
+      # type: object
+      # properties:
+        # text:
+          # type: string
+          # description: The message text
+        # status:
+          # type: string
+          # enum: [draft, pending, sent, failed]
+          # description: The status of the message
